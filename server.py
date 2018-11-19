@@ -181,6 +181,8 @@ def add_agent(id, send):
         game = Game(GAME_BINARY, 40)  # 本来はターン数もランダムっぽい
         for agent in agents:
             agent.send_start_comp(game)
+        for v in viewers:
+            v.send_start_comp(game)
 
 def start_ok(id):
     for agent in agents:
