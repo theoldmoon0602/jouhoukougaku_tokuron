@@ -9,13 +9,13 @@
 ## 使い方
 
 ```
-$ python server.py localhost 8910 simulator/simulator.exe
+$ python server.py localhost 8000 simulator/simulator.exe
 ```
 
 としてサーバを起動した上で、
 
 ```
-$ python client_example.py
+$ python client_example.py localhost 8000
 ```
 
 とクライアントを起動します。Viewerは未対応

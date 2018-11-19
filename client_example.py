@@ -1,5 +1,6 @@
 import socket
 import json
+import sys
 
 def recvline(conn):
     buf = b''
@@ -16,7 +17,7 @@ def sendline(conn, s):
 
 
 conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-conn.connect(('localhost', 8901))
+conn.connect((sys.argv[1], int(sys.argv[2])))
 
 sendline(conn, json.dumps({
     "type": 'start_connection_client',

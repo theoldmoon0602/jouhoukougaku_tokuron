@@ -44,7 +44,7 @@ class Game():
         self.game_state = json.loads(output)
 
 class Viewer():
-    def __init__(self. id, send):
+    def __init__(self, id, send):
         self.id = id
         self.send = send
 
