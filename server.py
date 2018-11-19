@@ -223,7 +223,7 @@ def action(id, data):
         else:
             for agent in agents:
                 agent.send_turn_info(game)
-            for v in viwers:
+            for v in viewers:
                 v.send_turn_info(game)
 
 
