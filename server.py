@@ -62,7 +62,8 @@ class Viewer():
                 "field_width": game.init_state["field_width"],
                 "field_height": game.init_state["field_height"],
                 "field": game.init_state["field"],
-                "agengs": game.init_state["agents"]
+                "agents": game.init_state["agents"]
+                "scores": game.game_state["scores"]
             }
         }))
 
@@ -123,7 +124,8 @@ class Agent():
                 "field_width": game.init_state["field_width"],
                 "field_height": game.init_state["field_height"],
                 "field": game.init_state["field"],
-                "agengs": game.init_state["agents"]
+                "agents": game.init_state["agents"]
+                "scores": game.game_state["scores"]
             }
         }))
 
