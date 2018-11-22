@@ -18,7 +18,7 @@ class Game():
     """
 
     def __init__(self, binary, max_turn):
-        self.max_turn = max_turn 
+        self.max_turn = max_turn
         self.binary = binary
 
         r = subprocess.run([binary, "init"], capture_output=True, encoding=sys.getdefaultencoding())
@@ -62,7 +62,7 @@ class Viewer():
                 "field_width": game.init_state["field_width"],
                 "field_height": game.init_state["field_height"],
                 "field": game.init_state["field"],
-                "agents": game.init_state["agents"]
+                "agents": game.init_state["agents"],
                 "scores": game.game_state["scores"]
             }
         }))
@@ -120,11 +120,11 @@ class Agent():
             "type": "start_competition_client",
             "payload": {
                 "max_turn_num": game.max_turn,
-                "your_agent_id": self.id,
+                "your_agent_id": self.agent_id,
                 "field_width": game.init_state["field_width"],
                 "field_height": game.init_state["field_height"],
                 "field": game.init_state["field"],
-                "agents": game.init_state["agents"]
+                "agents": game.init_state["agents"],
                 "scores": game.game_state["scores"]
             }
         }))
@@ -175,9 +175,9 @@ def add_agent(id, send):
     global agents
     global game
 
-    agents.append(Agent(id, send, len(agents) - 1))
+    agents.append(Agent(id, send, len(agents)))
     agents[-1].send_init()
-    print(id)
+    print("[+]{}".format(id))
 
     if len(agents) == N:
         game = Game(GAME_BINARY, 40)  # 本来はターン数もランダムっぽい
@@ -245,7 +245,7 @@ class EchoServer(asyncio.Protocol):
         self.transport.write(b)
 
     def data_received(self, data):
-        print("[+]{}".format(data))
+        # print("[+]{}".format(data))
         r = json.loads(data)
         if r["type"] == "start_connection_client":
             add_agent(self.id, self.send)
