@@ -1,7 +1,6 @@
-import socket
-import json
 import sys
 import random
+import json
 
 class Agent():
     """
@@ -12,15 +11,34 @@ class Agent():
         """
         initialize this agent
         """
-        self.agent_id = int(initial_status["your_agent_id"])
-        self.field = initial_status["field"]
-        self.q_valeus = {}
+        self.q_values = {}
         self.rate = rate
         self.discount = discount
         self.epsilon = epsilon
 
+    def dump(self):
+        d = {}
+        for k, v in self.q_values.items():
+            dd = {}
+            for kk, vv in v.items():
+                dd["{},{}".format(*kk)] = vv
+            d[k] = dd
+        return json.dumps(d)
+
+    def load(self, qvalues):
+        d = json.loads(qvalues)
+        for k, v in d.items():
+            self.q_values[k] = {}
+            for kk, vv in v.items():
+                kkk = tuple(map(int, kk.split(",")))
+                self.q_values[k][kkk] = vv
+
+
+
     def set_initial_status(self, initial_status):
         self.initial_status = initial_status
+        self.agent_id = int(initial_status["your_agent_id"])
+        self.field = initial_status["field"]
 
     def _getxy(self, x, y, arr, default):
         """
@@ -55,29 +73,29 @@ class Agent():
         """
         status_hash = self.make_hash(status)
         action_tuple = tuple(action)
-        if status_hash not in self.q_valeus:
+        if status_hash not in self.q_values:
             return 0
-        if action_tuple not in self.q_valeus[status_hash]:
+        if action_tuple not in self.q_values[status_hash]:
             return 0
-        return self.q_valeus[status_hash][action_tuple]
+        return self.q_values[status_hash][action_tuple]
 
     def getQValues(self, status):
         """
         get Q values from status
         """
         status_hash = self.make_hash(status)
-        if status_hash not in self.q_valeus:
+        if status_hash not in self.q_values:
             return []
-        return self.q_valeus[status_hash]
+        return self.q_values[status_hash]
 
     def getMaxQ(self, status):
         """
         get max Q value from status
         """
         status_hash = self.make_hash(status)
-        if status_hash not in self.q_valeus:
+        if status_hash not in self.q_values:
             return 0
-        return max(self.q_valeus[status_hash].values())
+        return max(self.q_values[status_hash].values())
 
     def setQ(self, status, action, v):
         """
@@ -85,9 +103,9 @@ class Agent():
         """
         status_hash = self.make_hash(status)
         action_tuple = tuple(action)
-        if status_hash not in self.q_valeus:
-            self.q_valeus[status_hash] = {}
-        self.q_valeus[status_hash][action_tuple] = v
+        if status_hash not in self.q_values:
+            self.q_values[status_hash] = {}
+        self.q_values[status_hash][action_tuple] = v
 
 
     def get_reward(self, reward, next_status):
@@ -105,6 +123,11 @@ class Agent():
 
         returns: [ action, direction  ]
         """
+
+        # 考察：盤面を 90, 180, 270度回転しても同一に見えそう
+        # 考察：他のエージェントの位置を考えていない
+        # 考察：なんかあったけど忘れた
+
         actions_values = self.getQValues(current_status)
         if random.random() <= self.epsilon or len(actions_values) == 0:
             action = [ random.randint(0, 1), random.randint(1, 9) ]
@@ -116,100 +139,7 @@ class Agent():
                 action = [ random.randint(0, 1), random.randint(1, 9) ]
             else:
                 action = random.choice(maxv_actions)
-                print(maxv_actions)
 
         self.last_status = current_status
         self.last_action = action
         return action
-
-
-def recvline(conn):
-    """
-    receive data from socket until newline
-    """
-    buf = b''
-    while True:
-        c = conn.recv(1)
-        if c == b"\n":
-            break
-        buf += c
-    return buf.decode()
-
-def sendline(conn, s):
-    """
-    send data with newline
-    """
-    b = (s + "\n").encode()
-    conn.send(b)
-
-
-# create TCP socket and connect to server -- host:port
-conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# conn.connect((sys.argv[1], int(sys.argv[2])))
-conn.connect(('localhost', 9999))
-
-# send client connection request
-sendline(conn, json.dumps({
-    "type": 'start_connection_client',
-    "payload": {}}))
-
-# receive ok response (!)
-line = recvline(conn)
-print(line)
-
-# return ok response
-sendline(conn, json.dumps({
-    "type": "start_connection_ok",
-    "payload": {}
-    }))
-
-
-# wait for starting competition...
-
-#get competition start alert
-init_state  = json.loads(recvline(conn))
-
-# create Agent
-LEARNING_RATE = 0.1
-DISCOUNT_RATE = 0.3
-EPSILON = 0.1
-agent = Agent(LEARNING_RATE, DISCOUNT_RATE, EPSILON)
-agent.set_initial_status(init_state["payload"])
-
-
-# response ok with agent id
-sendline(conn, json.dumps({
-    "type": "start_competition_ok_client",
-    "payload": {
-        "my_agent_id": agent.agent_id
-    }}))
-
-turn_info = json.loads(recvline(conn))
-
-# while competition continueing
-while True:
-    # print(turn_info)
-
-    # thinking...
-    next_action = agent.action(turn_info["payload"])
-    # print(next_action)
-
-    # send my action
-    sendline(conn, json.dumps({
-        "type": "action_information",
-        "payload": {
-            "my_agent_id": agent.agent_id,
-            "action_type": next_action[0],
-            "action_direction": next_action[1]
-            }
-        }))
-
-    # receive turn infomation or end competition alert
-    turn_info = json.loads(recvline(conn))
-    if turn_info["type"] == "end_competition":
-        break
-
-    # add reward
-    s1, s2 = turn_info["payload"]["scores"]
-    agent.get_reward( s1 - s2 if agent.agent_id <= 1 else s2 - s1, turn_info["payload"])
-print(turn_info)

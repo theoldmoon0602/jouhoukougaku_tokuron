@@ -11,6 +11,8 @@ viewers = []
 game = None
 GAME_BINARY = ""
 N = 4
+comp_ok_agents = set()
+action_agents = set()
 
 class Game():
     """
@@ -175,9 +177,13 @@ def add_agent(id, send):
     global agents
     global game
 
+    if len(agents) >= N:
+        print("[+]refused new agent{}".format(id))
+        return
+
     agents.append(Agent(id, send, len(agents)))
     agents[-1].send_init()
-    print("[+]{}".format(id))
+    print("[+]new agent{}".format(id))
 
     if len(agents) == N:
         game = Game(GAME_BINARY, 40)  # 本来はターン数もランダムっぽい
@@ -185,6 +191,7 @@ def add_agent(id, send):
             agent.send_start_comp(game)
         for v in viewers:
             v.send_start_comp(game)
+        print("[+]competition start!")
 
 def start_ok(id):
     for agent in agents:
@@ -193,9 +200,8 @@ def start_ok(id):
             break
 
 
-comp_ok_agents = set()
 def competiton_ok(id):
-    global comp_ok_count
+    global comp_ok_agents
     for agent in agents:
         if agent.id == id and id not in comp_ok_agents:
             comp_ok_agents.add(id)
@@ -206,9 +212,11 @@ def competiton_ok(id):
         for agent in agents:
             agent.send_turn_info(game)
 
-action_agents = set()
 def action(id, data):
     global action_agents
+    global comp_ok_agents
+    global agents
+    global viewers
     for agent in agents:
         if agent.id == id and id not in action_agents:
             action_agents.add(id)
@@ -223,7 +231,12 @@ def action(id, data):
                 agent.send_end_comp(game)
             for v in viewers:
                 v.send_end_comp(game)
-            sys.exit()
+            agents = []
+            viewers = []
+            comp_ok_agents = set()
+            action_agents = set()
+            print("[+]competition has end")
+
         else:
             for agent in agents:
                 agent.send_turn_info(game)
