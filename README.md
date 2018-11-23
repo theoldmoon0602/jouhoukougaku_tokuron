@@ -3,19 +3,38 @@
 のやつ
 
 - server.py   server部分です
-- simulator   simulatorです。server.pyと一緒に使う。D言語製
-- client\_example.py   clientのサンプル実装です
+- simulator.exe  release をみて
+- learner_example.py  学習プログラムサンプル
+- q_example.py  サンプルAgent
+- random_example.py  こちらはAgent＋Serverとの通信
+
 
 ## 使い方
+
+サーバ準備
 
 ```
 $ python server.py localhost 8000 simulator/simulator.exe
 ```
 
-としてサーバを起動した上で、
+1. 学習する（larner_example)
+
+ 勝手に10エピソードくらい回ります。回ったあと学習したデータのjsonを吐く。
 
 ```
-$ python client_example.py localhost 8000
+$ python learner_example.py localhost 8000
 ```
 
-とクライアントを起動します。Viewerは未対応
+ q_example.py のAgentを使ってます。q_example.pyのAgentをまねして独自Agentを作るといい感じになりそう
+
+2. randomを動かす
+
+ random agent を動かす場合は 4つ動かしてね
+
+```
+$ python random_example.py localhost 8000
+```
+
+3. viewer を動かす
+
+viewer プロトコルを実装した上で、サーバにつなぐとOK

@@ -57,8 +57,7 @@ def sendline(conn, s):
 
 # create TCP socket and connect to server -- host:port
 conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# conn.connect((sys.argv[1], int(sys.argv[2])))
-conn.connect(('localhost', 9999))
+conn.connect((sys.argv[1], int(sys.argv[2])))
 
 # send client connection request
 sendline(conn, json.dumps({
