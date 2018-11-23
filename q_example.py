@@ -8,17 +8,19 @@ class Agent():
     Agent class you should implement this
     """
 
-    def __init__(self, initial_status, rate, discount, epsilon):
+    def __init__(self, rate, discount, epsilon):
         """
         initialize this agent
         """
-        self.initial_status = initial_status
         self.agent_id = int(initial_status["your_agent_id"])
         self.field = initial_status["field"]
         self.q_valeus = {}
         self.rate = rate
         self.discount = discount
         self.epsilon = epsilon
+
+    def set_initial_status(self, initial_status):
+        self.initial_status = initial_status
 
     def _getxy(self, x, y, arr, default):
         """
@@ -171,7 +173,9 @@ init_state  = json.loads(recvline(conn))
 LEARNING_RATE = 0.1
 DISCOUNT_RATE = 0.3
 EPSILON = 0.1
-agent = Agent(init_state["payload"], LEARNING_RATE, DISCOUNT_RATE, EPSILON)
+agent = Agent(LEARNING_RATE, DISCOUNT_RATE, EPSILON)
+agent.set_initial_status(init_state["payload"])
+
 
 # response ok with agent id
 sendline(conn, json.dumps({
