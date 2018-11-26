@@ -259,23 +259,31 @@ class EchoServer(asyncio.Protocol):
 
     def data_received(self, data):
         # print("[+]{}".format(data))
-        r = json.loads(data)
-        if r["type"] == "start_connection_client":
-            add_agent(self.id, self.send)
-        if r["type"] == "start_connection_viewer":
-            add_viewer(self.id, self.send)
-        if r["type"] == "start_connection_ok":
-            start_ok(self.id)
-        if r["type"] == "start_competition_ok_client":
-            competiton_ok(self.id)
-        if r["type"] == "start_competition_ok_viewer":
-            pass
-        if r["type"] == "turn_information_ok":
-            pass
-        if r["type"] == "end_competition_ok":
-            pass
-        if r["type"] == "action_information":
-            action(self.id, r["payload"])
+        if type(data) == "str":
+            s = data.split("\n")
+        else:
+            s = data.decode().split("\n")
+
+        for r in s:
+            if len(r) == 0:
+                continue
+            r = json.loads(r.strip())
+            if r["type"] == "start_connection_client":
+                add_agent(self.id, self.send)
+            if r["type"] == "start_connection_viewer":
+                add_viewer(self.id, self.send)
+            if r["type"] == "start_connection_ok":
+                start_ok(self.id)
+            if r["type"] == "start_competition_ok_client":
+                competiton_ok(self.id)
+            if r["type"] == "start_competition_ok_viewer":
+                pass
+            if r["type"] == "turn_information_ok":
+                pass
+            if r["type"] == "end_competition_ok":
+                pass
+            if r["type"] == "action_information":
+                action(self.id, r["payload"])
 
     def connection_lost(self, exc):
         self.transport.close()

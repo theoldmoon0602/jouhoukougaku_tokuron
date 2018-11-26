@@ -105,7 +105,7 @@ def main():
         rs = []
         for i in range(4):
             # r = pool.apply_async(learning, args=('localhost', 9999, agents[i]))
-            r = pool.apply_async(learning, args=(sys.argv[1], sys.argv[2], agents[i]))
+            r = pool.apply_async(learning, args=(sys.argv[1], int(sys.argv[2]), agents[i]))
             rs.append(r)
         pool.close()
         pool.join()
