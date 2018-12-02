@@ -6,7 +6,8 @@
 - simulator.exe  release をみて
 - learner_example.py  学習プログラムサンプル
 - q_example.py  サンプルAgent
-- random_example.py  こちらはAgent＋Serverとの通信
+- random_example.py Randomに学習するAgent
+- battle_example.py 学習せず戦わせるだけのプログラム 
 
 
 ## 使い方
